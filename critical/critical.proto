@@ -1,5 +1,5 @@
 syntax = "proto3";
 
-package chatpackage;
-option go_package = "https://github.com/Troelshjarne/Exercise_2;critical";
+package criticalpackage;
+option go_package = "https://github.com/Troelshjarne/Exercise_2;criticalpackage";
 
