@@ -6,4 +6,5 @@ Any of the following actions result in an increase of the Lamport Timestamp:
  - A client joins the system.
  - A client requests access to the critical section.
  - A client relinquishes access to the critical section.  
+
 The system assumes all members act in good faith; that no one would lie about Timestamps.
