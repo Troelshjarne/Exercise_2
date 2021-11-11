@@ -37,5 +37,5 @@ message Channel {
  service Communication{
     rpc joinCluster(Channel) returns (stream request) {}
 
-    rpc sendMessage (stream request) returns (ack) {}
+    rpc sendRequest (stream request) returns (ack) {}
  }

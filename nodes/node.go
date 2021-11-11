@@ -17,4 +17,7 @@ func (s *Server) joinCluster(ch *criticalpackage.Channel, requestStream critical
 	requestChannel := make(chan *criticalpackage.Request)
 
 	s.channel[ch.NodeId] = append(s.channel[ch.NodeId], requestChannel)
+
 }
+
+func (s *Server) sendRequest()

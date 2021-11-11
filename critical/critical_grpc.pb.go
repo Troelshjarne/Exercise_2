@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommunicationClient interface {
 	JoinCluster(ctx context.Context, in *Channel, opts ...grpc.CallOption) (Communication_JoinClusterClient, error)
-	SendMessage(ctx context.Context, opts ...grpc.CallOption) (Communication_SendMessageClient, error)
+	SendRequest(ctx context.Context, opts ...grpc.CallOption) (Communication_SendRequestClient, error)
 }
 
 type communicationClient struct {
@@ -62,30 +62,30 @@ func (x *communicationJoinClusterClient) Recv() (*Request, error) {
 	return m, nil
 }
 
-func (c *communicationClient) SendMessage(ctx context.Context, opts ...grpc.CallOption) (Communication_SendMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Communication_ServiceDesc.Streams[1], "/criticalpackage.Communication/sendMessage", opts...)
+func (c *communicationClient) SendRequest(ctx context.Context, opts ...grpc.CallOption) (Communication_SendRequestClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Communication_ServiceDesc.Streams[1], "/criticalpackage.Communication/sendRequest", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &communicationSendMessageClient{stream}
+	x := &communicationSendRequestClient{stream}
 	return x, nil
 }
 
-type Communication_SendMessageClient interface {
+type Communication_SendRequestClient interface {
 	Send(*Request) error
 	CloseAndRecv() (*Ack, error)
 	grpc.ClientStream
 }
 
-type communicationSendMessageClient struct {
+type communicationSendRequestClient struct {
 	grpc.ClientStream
 }
 
-func (x *communicationSendMessageClient) Send(m *Request) error {
+func (x *communicationSendRequestClient) Send(m *Request) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *communicationSendMessageClient) CloseAndRecv() (*Ack, error) {
+func (x *communicationSendRequestClient) CloseAndRecv() (*Ack, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (x *communicationSendMessageClient) CloseAndRecv() (*Ack, error) {
 // for forward compatibility
 type CommunicationServer interface {
 	JoinCluster(*Channel, Communication_JoinClusterServer) error
-	SendMessage(Communication_SendMessageServer) error
+	SendRequest(Communication_SendRequestServer) error
 	mustEmbedUnimplementedCommunicationServer()
 }
 
@@ -112,8 +112,8 @@ type UnimplementedCommunicationServer struct {
 func (UnimplementedCommunicationServer) JoinCluster(*Channel, Communication_JoinClusterServer) error {
 	return status.Errorf(codes.Unimplemented, "method JoinCluster not implemented")
 }
-func (UnimplementedCommunicationServer) SendMessage(Communication_SendMessageServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
+func (UnimplementedCommunicationServer) SendRequest(Communication_SendRequestServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendRequest not implemented")
 }
 func (UnimplementedCommunicationServer) mustEmbedUnimplementedCommunicationServer() {}
 
@@ -149,25 +149,25 @@ func (x *communicationJoinClusterServer) Send(m *Request) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _Communication_SendMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CommunicationServer).SendMessage(&communicationSendMessageServer{stream})
+func _Communication_SendRequest_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CommunicationServer).SendRequest(&communicationSendRequestServer{stream})
 }
 
-type Communication_SendMessageServer interface {
+type Communication_SendRequestServer interface {
 	SendAndClose(*Ack) error
 	Recv() (*Request, error)
 	grpc.ServerStream
 }
 
-type communicationSendMessageServer struct {
+type communicationSendRequestServer struct {
 	grpc.ServerStream
 }
 
-func (x *communicationSendMessageServer) SendAndClose(m *Ack) error {
+func (x *communicationSendRequestServer) SendAndClose(m *Ack) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *communicationSendMessageServer) Recv() (*Request, error) {
+func (x *communicationSendRequestServer) Recv() (*Request, error) {
 	m := new(Request)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -189,8 +189,8 @@ var Communication_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "sendMessage",
-			Handler:       _Communication_SendMessage_Handler,
+			StreamName:    "sendRequest",
+			Handler:       _Communication_SendRequest_Handler,
 			ClientStreams: true,
 		},
 	},
