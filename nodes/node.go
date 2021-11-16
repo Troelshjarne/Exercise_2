@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"net"
+
 	criticalpackage "github.com/Troelshjarne/Exercise_2/critical"
-	//"google.golang.org/grpc"
-	//"github.com/hashicorp/go-msgpack/codec"
-	//"github.com/hashicorp/logutils"
-	//"github.com/hashicorp/serf/coordinate"
+	"google.golang.org/grpc"
 )
 
 var lamTime = 0
@@ -30,3 +31,21 @@ func (s *Server) joinCluster(ch *criticalpackage.Channel, requestStream critical
 }
 
 func (s *Server) sendRequest()
+
+func main() {
+
+	fmt.Println("=== Node starting up ===")
+	list, err := net.Listen("tcp", ":9080")
+
+	if err != nil {
+		log.Fatalf("Failed to listen on port 9080: %v", err)
+	}
+
+	var options []grpc.ServerOption
+	grpcServer := grpc.NewServer(options...)
+
+	criticalpackage.RegisterCommunicationServer(grpcServer, &Server{
+		channel: make(map[string][]chan *criticalpackage.Request),
+	})
+	grpcServer.Serve(list)
+}
